@@ -45,6 +45,7 @@ local indicatorTimer = nil
 local pulseTimer = nil
 local pulseDirection = 1
 local pulseAlpha = 0.3
+local telemetry = nil
 
 
 local function notify(title, text, sound)
@@ -73,6 +74,74 @@ local function playSound(type)
     if sounds[type] then
         hs.sound.getByName(sounds[type]):play()
     end
+end
+
+local function formatDuration(value)
+    if not value or value <= 0 then return "n/a" end
+    return string.format("%.2fs", value)
+end
+
+local function toNumber(value)
+    if type(value) == "number" then
+        return value
+    elseif type(value) == "string" and value ~= "" then
+        local parsed = tonumber(value)
+        if parsed and parsed >= 0 then return parsed end
+    end
+    return nil
+end
+
+local function buildTelemetrySummary()
+    if not telemetry then return nil end
+
+    local metrics = telemetry.curlMetrics or {}
+    local parts = {}
+
+    if telemetry.recordingDuration then
+        table.insert(parts, "record " .. formatDuration(telemetry.recordingDuration))
+    end
+
+    local upload = toNumber(metrics.time_upload)
+    if upload and upload > 0 then
+        table.insert(parts, "upload " .. formatDuration(upload))
+    end
+
+    local responseWait = nil
+    local startTransfer = toNumber(metrics.time_starttransfer)
+    local uploadRef = toNumber(metrics.time_upload)
+    if startTransfer and uploadRef then
+        responseWait = startTransfer - uploadRef
+        if responseWait <= 0 then responseWait = nil end
+    end
+    if responseWait then
+        table.insert(parts, "server " .. formatDuration(responseWait))
+    end
+
+    local download = toNumber(metrics.time_download)
+    if download and download > 0 then
+        table.insert(parts, "download " .. formatDuration(download))
+    end
+
+    local total = toNumber(metrics.time_total)
+    if total and total > 0 then
+        table.insert(parts, "api " .. formatDuration(total))
+    end
+
+    if telemetry.transcriptionStartedAt and telemetry.transcriptionFinishedAt and total and total > 0 then
+        local measured = telemetry.transcriptionFinishedAt - telemetry.transcriptionStartedAt
+        if measured and measured > total then
+            local localTime = measured - total
+            if localTime > 0 then
+                table.insert(parts, "local " .. formatDuration(localTime))
+            end
+        end
+    end
+
+    if #parts > 0 then
+        return "⏱ " .. table.concat(parts, " | ")
+    end
+
+    return nil
 end
 
 local function which(cmd)
@@ -447,6 +516,12 @@ local function transcribeAudio(path)
     updateUI()
     createTranscribingIndicator()
 
+    if telemetry then
+        telemetry.transcriptionStartedAt = hs.timer.secondsSinceEpoch()
+    else
+        telemetry = { transcriptionStartedAt = hs.timer.secondsSinceEpoch() }
+    end
+
     local url = "https://api.groq.com/openai/v1/audio/transcriptions"
     local curlArgs = {
         "-sS", "-m", tostring(CONFIG.API_TIMEOUT),
@@ -461,6 +536,9 @@ local function transcribeAudio(path)
         table.insert(curlArgs, "language=" .. CONFIG.LANGUAGE)
     end
 
+    table.insert(curlArgs, "-w")
+    table.insert(curlArgs, '__CURL_TIMING__{"time_total":"%{time_total}","time_upload":"%{time_upload}","time_starttransfer":"%{time_starttransfer}","time_download":"%{time_download}"}')
+
     table.insert(curlArgs, url)
 
     local curl = hs.task.new("/usr/bin/curl", function(exitCode, out, err)
@@ -473,9 +551,25 @@ local function transcribeAudio(path)
         end
         updateUI()
 
+        local metrics = nil
+        if out and out:find("__CURL_TIMING__") then
+            local bodyPart, metricsPart = out:match("^(.*)__CURL_TIMING__(%b{})$")
+            if bodyPart then
+                out = bodyPart
+                local okMetrics, parsed = pcall(hs.json.decode, metricsPart)
+                if okMetrics and type(parsed) == "table" then
+                    metrics = parsed
+                    if telemetry then telemetry.curlMetrics = parsed end
+                end
+            end
+        end
+
+        out = (out or ""):gsub("%s+$", "")
+
         if exitCode ~= 0 then
             notify("API Error", err or "Network request failed", "Basso")
             playSound("error")
+            telemetry = nil
             return
         end
 
@@ -483,25 +577,42 @@ local function transcribeAudio(path)
         if not ok or not body then
             notify("API Error", "Invalid response from server", "Basso")
             playSound("error")
+            telemetry = nil
             return
         end
 
         if body.error then
             notify("Transcription Error", body.error.message or "Unknown API error", "Basso")
             playSound("error")
+            telemetry = nil
             return
         end
 
         local text = (body.text or ""):gsub("^%s+", ""):gsub("%s+$", "")
         if text == "" then
             notify("No Speech", "No text was detected in the audio", "Funk")
+            telemetry = nil
             return
+        end
+
+        local now = hs.timer.secondsSinceEpoch()
+        if telemetry then
+            telemetry.transcriptionFinishedAt = now
+            if not telemetry.curlMetrics and metrics then
+                telemetry.curlMetrics = metrics
+            end
         end
 
         hs.pasteboard.setContents(text)
         hs.eventtap.keyStroke({ "cmd" }, "v", 0)
-        notify("Success", "\"" .. (text:len() > 50 and text:sub(1, 50) .. "..." or text) .. "\"", "Glass")
+        local preview = "\"" .. (text:len() > 50 and text:sub(1, 50) .. "..." or text) .. "\""
+        local summary = buildTelemetrySummary()
+        if summary then
+            print("[whisper] " .. summary)
+        end
+        notify("Success", preview, "Glass")
         playSound("success")
+        telemetry = nil
     end, curlArgs)
 
     curl:start()
@@ -511,6 +622,14 @@ end
 function stopRecordingAndTranscribe()
     if not isRecording then return end
 
+    local now = hs.timer.secondsSinceEpoch()
+    if telemetry then
+        if telemetry.recordingStartedAt then
+            telemetry.recordingDuration = now - telemetry.recordingStartedAt
+        end
+        telemetry.recordingStoppedAt = now
+    end
+
     cleanupRecording()
     playSound("stop")
 
@@ -518,6 +637,7 @@ function stopRecordingAndTranscribe()
     if not attrs or (attrs.size or 0) < CONFIG.MIN_BYTES then
         notify("Recording Too Short", "Please speak for a longer duration", "Funk")
         if wavPath then os.remove(wavPath) end
+        telemetry = nil
         return
     end
 
@@ -533,6 +653,8 @@ local function startRecording()
     if not REC or not GROQ_API_KEY or GROQ_API_KEY == "" then
         if not checkDependencies() then return end
     end
+
+    telemetry = { recordingStartedAt = hs.timer.secondsSinceEpoch() }
 
     isRecording = true
     wavPath = tmpWavPath()
