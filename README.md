@@ -34,6 +34,37 @@ Edit the `CONFIG` table in `whisper.lua` to customize:
 
 ---
 
+### Gemini OCR
+
+Screenshot-based text extraction using Google's Gemini API with automatic translation.
+
+**Features:**
+- **Screenshot Capture**: Interactive screenshot selection with hotkey
+- **AI-Powered OCR**: Extract text from images using Gemini Flash models
+- **Auto-Translation**: Automatically translates non-English text to English
+- **Visual Feedback**: Pulsing indicator shows processing status
+- **Sound Effects**: Audio feedback for capture, processing, and completion
+- **Menubar Control**: Access settings and model selection via menubar
+- **Auto-Copy**: Extracted text automatically copied to clipboard
+
+**Requirements:**
+- Google Gemini API key (set as environment variable `GEMINI_API_KEY`)
+- Active internet connection
+
+**Usage:**
+- **Capture**: Press Cmd+Shift+S to start screenshot selection
+- **Select Area**: Click and drag to select area containing text
+- **Wait**: Processing indicator appears while OCR is running
+- **Result**: Text is automatically copied to clipboard and shown in notification
+
+**Configuration:**
+- **Model Selection**: Choose between Gemini Flash or Flash Lite
+- **Notifications**: Toggle on/off via menubar
+- **Sounds**: Toggle audio feedback via menubar
+- **Hotkey**: Default is Cmd+Shift+S (customizable in code)
+
+---
+
 ### Spotify Lyrics
 
 Real-time synchronized lyrics display for Spotify with a draggable overlay.
@@ -67,9 +98,23 @@ Real-time synchronized lyrics display for Spotify with a draggable overlay.
 
 1. Install [Hammerspoon](https://www.hammerspoon.org/)
 2. Clone or download this repository to `~/.hammerspoon/`
-3. Ensure `init.lua` loads the packages:
+3. Set up environment variables:
+   ```bash
+   # For Gemini OCR
+   export GEMINI_API_KEY="your-gemini-api-key"
+   
+   # For Whisper Transcription
+   export GROQ_API_KEY="your-groq-api-key"
+   ```
+4. Install dependencies:
+   ```bash
+   # For Whisper Transcription
+   brew install sox
+   ```
+5. Ensure `init.lua` loads the packages:
    ```lua
+   require("gemini")
    require("whisper")
    require("lyrics")
    ```
-4. Reload Hammerspoon configuration
+6. Reload Hammerspoon configuration

@@ -289,7 +289,7 @@ function updateUI()
         menubar:setIcon(hs.image.imageFromName("NSTouchBarRecordStartTemplate"))
         menubar:setTooltip("Whisper Transcription Ready\nHold " ..
                          table.concat(CONFIG.HOTKEY_MODS, "+") .. "+" .. CONFIG.HOTKEY_KEY .. " to record")
-        
+
         local languageSubmenu = {}
         for _, lang in ipairs(LANGUAGES) do
             table.insert(languageSubmenu, {
@@ -302,7 +302,7 @@ function updateUI()
                 checked = CONFIG.LANGUAGE == lang.value
             })
         end
-        
+
         menubar:setMenu({
             { title = "Ready to Record", disabled = true },
             { title = "-" },
@@ -595,7 +595,7 @@ local function transcribeAudio(path)
         if summary then
             print("[whisper] " .. summary)
         end
-        notify("Success", preview, "Glass")
+        notify("Groq", preview, "Glass")
         playSound("success")
         telemetry = nil
     end, curlArgs)
