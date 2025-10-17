@@ -72,8 +72,4 @@ Real-time synchronized lyrics display for Spotify with a draggable overlay.
    require("whisper")
    require("lyrics")
    ```
-4. For Whisper: Set your Groq API key:
-   ```bash
-   launchctl setenv GROQ_API_KEY your_key_here
-   ```
-5. Reload Hammerspoon configuration
+4. Reload Hammerspoon configuration
