@@ -195,7 +195,6 @@ end
 
 
 local function changeLanguage()
-    print("changeLanguage called")
     local chooser = hs.chooser.new(function(choice)
         if not choice then return end
         CONFIG.LANGUAGE = choice.value
@@ -210,7 +209,6 @@ local function changeLanguage()
 end
 
 local function changeModel()
-    print("changeModel called")
     local models = {
         { text = "Whisper Large v3 ($0.111/hr)", value = "whisper-large-v3" },
         { text = "Whisper Large v3 Turbo ($0.04/hr)", value = "whisper-large-v3-turbo" },
@@ -229,14 +227,12 @@ local function changeModel()
 end
 
 local function toggleNotifications()
-    print("toggleNotifications called")
     CONFIG.ENABLE_NOTIFY = not CONFIG.ENABLE_NOTIFY
     notify("Settings", "Notifications " .. (CONFIG.ENABLE_NOTIFY and "enabled" or "disabled"), "Glass")
     updateUI()
 end
 
 local function toggleSounds()
-    print("toggleSounds called")
     CONFIG.ENABLE_SOUND = not CONFIG.ENABLE_SOUND
     local message = "Sounds " .. (CONFIG.ENABLE_SOUND and "enabled" or "disabled")
     if CONFIG.ENABLE_NOTIFY then
@@ -245,60 +241,7 @@ local function toggleSounds()
     updateUI()
 end
 
-local function showSettings()
-    print("showSettings called")
-
-    local settingsChoices = {
-        {
-            text = "🌐 Language: " .. formatLanguageName(CONFIG.LANGUAGE),
-            subText = "Change transcription language",
-            action = "language"
-        },
-        {
-            text = "🤖 Model: " .. CONFIG.MODEL,
-            subText = "Change Whisper model",
-            action = "model"
-        },
-        {
-            text = "🔔 Notifications: " .. (CONFIG.ENABLE_NOTIFY and "ON" or "OFF"),
-            subText = "Toggle notification popups",
-            action = "notifications"
-        },
-        {
-            text = "🔊 Sounds: " .. (CONFIG.ENABLE_SOUND and "ON" or "OFF"),
-            subText = "Toggle audio feedback",
-            action = "sounds"
-        },
-    }
-
-    local chooser = hs.chooser.new(function(choice)
-        if not choice then
-            print("Settings chooser cancelled")
-            return
-        end
-
-        print("Settings choice selected: " .. choice.action)
-
-        if choice.action == "language" then
-            changeLanguage()
-        elseif choice.action == "model" then
-            changeModel()
-        elseif choice.action == "notifications" then
-            toggleNotifications()
-        elseif choice.action == "sounds" then
-            toggleSounds()
-        end
-    end)
-
-    chooser:choices(settingsChoices)
-    chooser:searchSubText(true)
-    chooser:placeholderText("Configure Whisper settings...")
-    chooser:show()
-end
-
 local function showAbout()
-    print("showAbout called")
-
     local aboutText = string.format([[Whisper Transcription v1.0
 
 Model: %s
@@ -313,10 +256,9 @@ Hold the hotkey to record speech, release to transcribe and paste.]],
         CONFIG.MODEL,
         formatLanguageName(CONFIG.LANGUAGE),
         table.concat(CONFIG.HOTKEY_MODS, "+") .. "+" .. CONFIG.HOTKEY_KEY,
-        REC and "✅ Installed" or "❌ Missing",
-        (GROQ_API_KEY and GROQ_API_KEY ~= "") and "✅ Set" or "❌ Missing"
+        REC and "Installed" or "Missing",
+        (GROQ_API_KEY and GROQ_API_KEY ~= "") and "Set" or "Missing"
     )
-
 
     hs.dialog.blockAlert("About Whisper Transcription", aboutText, "OK")
 end
@@ -326,43 +268,86 @@ function updateUI()
     if not menubar then return end
 
     if isRecording then
-        menubar:setTitle("🎙️")
+        menubar:setIcon(hs.image.imageFromName("NSStatusAvailable"))
         menubar:setTooltip("Recording audio... (Hold to continue)")
         menubar:setMenu({
-            { title = "🔴 Recording...", disabled = true },
+            { title = "Recording...", disabled = true },
             { title = "-" },
             { title = "Stop Recording", fn = stopRecordingAndTranscribe },
             { title = "-" },
             { title = "Quit", fn = function() os.exit() end },
         })
     elseif isBusy then
-        menubar:setTitle("⏳")
+        menubar:setIcon(hs.image.imageFromName("NSStatusPartiallyAvailable"))
         menubar:setTooltip("Transcribing audio...")
         menubar:setMenu({
-            { title = "🔄 Transcribing...", disabled = true },
+            { title = "Transcribing...", disabled = true },
             { title = "-" },
             { title = "Quit", fn = function() os.exit() end },
         })
     else
-        menubar:setTitle("🎤")
+        menubar:setIcon(hs.image.imageFromName("NSTouchBarRecordStartTemplate"))
         menubar:setTooltip("Whisper Transcription Ready\nHold " ..
                          table.concat(CONFIG.HOTKEY_MODS, "+") .. "+" .. CONFIG.HOTKEY_KEY .. " to record")
+        
+        local languageSubmenu = {}
+        for _, lang in ipairs(LANGUAGES) do
+            table.insert(languageSubmenu, {
+                title = lang.text,
+                fn = function()
+                    CONFIG.LANGUAGE = lang.value
+                    notify("Language Changed", "Set to: " .. lang.text, "Glass")
+                    updateUI()
+                end,
+                checked = CONFIG.LANGUAGE == lang.value
+            })
+        end
+        
         menubar:setMenu({
-            { title = "✅ Ready to Record", disabled = true },
+            { title = "Ready to Record", disabled = true },
             { title = "-" },
             {
-                title = "Settings",
-                fn = function()
-                    print("Settings menu clicked")
-                    showSettings()
-                end
+                title = "Language: " .. formatLanguageName(CONFIG.LANGUAGE),
+                menu = languageSubmenu
             },
             {
+                title = "Model: " .. (CONFIG.MODEL == "whisper-large-v3" and "Large v3" or "Large v3 Turbo"),
+                menu = {
+                    {
+                        title = "Whisper Large v3 ($0.111/hr)",
+                        fn = function()
+                            CONFIG.MODEL = "whisper-large-v3"
+                            notify("Model Changed", "Set to: Whisper Large v3", "Glass")
+                            updateUI()
+                        end,
+                        checked = CONFIG.MODEL == "whisper-large-v3"
+                    },
+                    {
+                        title = "Whisper Large v3 Turbo ($0.04/hr)",
+                        fn = function()
+                            CONFIG.MODEL = "whisper-large-v3-turbo"
+                            notify("Model Changed", "Set to: Whisper Large v3 Turbo", "Glass")
+                            updateUI()
+                        end,
+                        checked = CONFIG.MODEL == "whisper-large-v3-turbo"
+                    }
+                }
+            },
+            { title = "-" },
+            {
+                title = "Notifications",
+                fn = toggleNotifications,
+                checked = CONFIG.ENABLE_NOTIFY
+            },
+            {
+                title = "Sounds",
+                fn = toggleSounds,
+                checked = CONFIG.ENABLE_SOUND
+            },
+            { title = "-" },
+            {
                 title = "About",
-                fn = function()
-                    print("About menu clicked")
-                    showAbout()
-                end
+                fn = showAbout
             },
             { title = "-" },
             { title = "Quit", fn = function() os.exit() end },
