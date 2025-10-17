@@ -1,1 +1,2 @@
 require("whisper")
+require("lyrics")
