@@ -1,234 +1,323 @@
-# Hammerspoon Packages
+# 🚀 Power Spoons
 
-A collection of Hammerspoon scripts for productivity and media control.
+> A curated collection of powerful Hammerspoon productivity tools with a built-in package manager
 
-## Packages
+Replace bloated Electron apps with lightweight, native macOS automation using Lua scripts. Power Spoons brings you professional-grade productivity tools that integrate seamlessly with macOS.
 
-### Whisper Transcription
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Real-time speech-to-text transcription using OpenAI's Whisper model via Groq API.
+## ✨ Features
 
-**Features:**
-- **Hotkey Recording**: Hold Option+/ to record audio, release to transcribe
-- **Automatic Pasting**: Transcribed text is automatically pasted into the active application
-- **Visual Indicators**: On-screen indicators show recording and transcription status
-- **Configurable Settings**: Change language, model, notifications, and sounds via menubar
-- **Multi-language Support**: Supports various languages including auto-detection
-
-**Requirements:**
-- [sox](https://sox.sourceforge.net/) (install with `brew install sox`)
-- Groq API key (add to `.env` file)
-
-**Usage:**
-- **Record**: Hold Option+/ to start recording
-- **Transcribe**: Release the hotkey to stop and transcribe
-- **Settings**: Click the menubar icon to access settings and about info
-
-**Configuration:**
-Edit the `CONFIG` table in `whisper.lua` to customize:
-- Hotkey combination
-- Whisper model (whisper-large-v3 or whisper-large-v3-turbo)
-- Default language
-- Notification and sound preferences
-- Recording parameters (sample rate, timeouts, etc.)
+- **📦 Package Manager**: Simple CLI tool (`hs-pm`) to install and manage spoons
+- **🎯 Zero Config**: One-liner installation with interactive setup
+- **🔧 Modular**: Enable only the spoons you need
+- **💾 Lightweight**: Native macOS integration, no Electron bloat
+- **🔐 Secure**: API keys stored locally in `.env` file
 
 ---
 
-### Gemini OCR
+## 🎁 Available Spoons
 
-Screenshot-based text extraction using Google's Gemini API with automatic translation.
+### 🎙️ Whisper Transcription
+Real-time speech-to-text using OpenAI's Whisper via Groq API.
 
-**Features:**
-- **Screenshot Capture**: Interactive screenshot selection with hotkey
-- **AI-Powered OCR**: Extract text from images using Gemini Flash models
-- **Auto-Translation**: Automatically translates non-English text to English
-- **Visual Feedback**: Pulsing indicator shows processing status
-- **Sound Effects**: Audio feedback for capture, processing, and completion
-- **Menubar Control**: Access settings and model selection via menubar
-- **Auto-Copy**: Extracted text automatically copied to clipboard
-
-**Requirements:**
-- Google Gemini API key (add to `.env` file)
-- Active internet connection
-
-**Usage:**
-- **Capture**: Press Cmd+Shift+S to start screenshot selection
-- **Select Area**: Click and drag to select area containing text
-- **Wait**: Processing indicator appears while OCR is running
-- **Result**: Text is automatically copied to clipboard and shown in notification
-
-**Configuration:**
-- **Model Selection**: Choose between Gemini Flash or Flash Lite
-- **Notifications**: Toggle on/off via menubar
-- **Sounds**: Toggle audio feedback via menubar
-- **Hotkey**: Default is Cmd+Shift+S (customizable in code)
+- **Hotkey**: `Option+/` - Hold to record, release to transcribe
+- **Auto-paste**: Transcribed text inserted automatically
+- **Multi-language**: 13+ languages with auto-detection
+- **Visual feedback**: On-screen recording indicators
+- **Requires**: sox (auto-installed), GROQ_API_KEY
 
 ---
 
-### Spotify Lyrics
+### 📸 Gemini OCR
+Screenshot-based text extraction with Google's Gemini AI.
 
-Real-time synchronized lyrics display for Spotify with a draggable overlay.
-
-**Features:**
-- **Synced Lyrics**: Displays current and next lyrics synchronized with playback
-- **Draggable Overlay**: Move the lyrics window anywhere on screen
-- **Auto-fetch**: Automatically fetches lyrics from lrclib.net API
-- **Persistent Position**: Remembers overlay position and visibility
-- **Menubar Control**: Show/hide lyrics via menubar icon
-
-**Requirements:**
-- Spotify application
-- Active internet connection for lyrics fetching
-
-**Usage:**
-- Lyrics automatically appear when Spotify is playing
-- Drag the overlay to reposition it
-- Click the menubar icon to show/hide lyrics
-- Position and visibility preferences are saved
-
-**How it works:**
-- Polls Spotify every 0.5 seconds for playback state
-- Fetches synced lyrics when a new track is detected
-- Displays current line in bold with next line preview
-- Shows track info, artist, playback position, and duration
+- **Hotkey**: `Cmd+Shift+S` - Screenshot area with text
+- **AI-powered**: Gemini Flash for accurate OCR
+- **Auto-translate**: Non-English text to English
+- **Smart formatting**: Clean, organized output
+- **Requires**: GEMINI_API_KEY
 
 ---
 
-### Trimmy
+### 🎵 Spotify Lyrics
+Floating synchronized lyrics overlay for Spotify.
 
-Automatically flattens multi-line shell commands copied to the clipboard, making them pasteable in one go.
-
-**Features:**
-- **Auto-Detection**: Automatically detects and flattens shell commands in clipboard
-- **Aggressiveness Levels**: Low/Normal/High detection sensitivity
-- **Backslash Handling**: Properly handles line continuations with `\`
-- **Blank Line Preservation**: Optional preservation of intentional blank lines
-- **Visual Feedback**: Menubar icon with last trimmed command preview
-- **Manual Override**: Force-trim clipboard on demand
-- **Persistent Settings**: All preferences saved automatically
-
-**Requirements:**
-- None - uses built-in Hammerspoon APIs
-
-**Usage:**
-- Copy multi-line shell commands - they're automatically flattened
-- Use menubar to toggle auto-trim, set aggressiveness, or manually trim
-- "Trim Clipboard Now" forces trimming regardless of auto-detection
-
-**Configuration:**
-- **Auto-Trim**: Enable/disable automatic clipboard processing
-- **Aggressiveness**: 
-  - Low (safer): Requires strong command indicators (≥3 signals)
-  - Normal (default): Balanced detection (≥2 signals)
-  - High (eager): Flattens most multi-line text (≥1 signal)
-- **Keep blank lines**: Preserves intentional blank lines during flattening
-
-**How it works:**
-- Polls clipboard every 150ms for changes
-- Scores text based on command-like patterns (pipes, flags, backslashes, sudo, etc.)
-- Flattens qualifying text by removing line breaks and handling continuations
-- Skips auto-processing for 10+ line copies (safety valve)
-
-**Inspired by:**
-This is a Lua/Hammerspoon port of the native macOS [Trimmy app](https://github.com/steipete/Trimmy) by [@steipete](https://github.com/steipete).
+- **Auto-sync**: Real-time lyrics synchronized with playback
+- **Draggable**: Position overlay anywhere on screen
+- **Persistent**: Remembers position and visibility
+- **No config needed**: Works out of the box
+- **Requires**: Spotify app
 
 ---
 
-## Project Structure
+### ✂️ Trimmy
+Automatically flatten multi-line shell commands in clipboard.
+
+- **Auto-detect**: Recognizes shell commands automatically
+- **Smart parsing**: Handles backslashes, pipes, flags
+- **Configurable**: Low/Normal/High aggressiveness levels
+- **Manual override**: Force-trim via menubar
+- **No dependencies**: Pure Hammerspoon implementation
+
+---
+
+## 📥 Installation
+
+### New Users (Recommended)
+
+One-liner installation:
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/m0hill/power-spoons/main/scripts/install.sh)"
+```
+
+Then run the interactive installer:
+
+```bash
+hs-pm init
+```
+
+This will:
+1. ✅ Install Hammerspoon (if needed)
+2. ✅ Install sox and other dependencies (if needed)
+3. ✅ Let you choose which spoons to enable
+4. ✅ Prompt for API keys
+5. ✅ Set up your `~/.hammerspoon` configuration
+
+### Existing Hammerspoon Users
+
+If you already use Hammerspoon and want to keep your existing config:
+
+```bash
+# Clone the repository
+git clone https://github.com/m0hill/power-spoons.git ~/.power-spoons
+
+# Add hs-pm to your PATH
+echo 'export PATH="$HOME/.power-spoons/scripts:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# View available spoons
+hs-pm available
+
+# Add specific spoons to your config
+hs-pm add whisper
+hs-pm add lyrics
+```
+
+**Manual Integration**: Add this to your existing `~/.hammerspoon/init.lua`:
+
+```lua
+-- Add power-spoons to package path
+package.path = package.path .. ";/Users/" .. os.getenv("USER") .. "/.power-spoons/core/?.lua"
+
+-- Load power-spoons
+local menubar = require("lib.menubar")
+local whisper = require("spoons.whisper")
+
+menubar.init({mode = "individual", modules = {whisper = {enabled = true, display = "individual"}}})
+whisper.init(menubar)
+```
+
+---
+
+## 🎮 Usage
+
+### Managing Spoons
+
+```bash
+# List all available spoons
+hs-pm available
+
+# List installed/enabled spoons
+hs-pm list
+
+# Add and enable a spoon
+hs-pm add whisper
+
+# Remove/disable a spoon
+hs-pm remove lyrics
+
+# Update power-spoons to latest version
+hs-pm update
+```
+
+### Configuration
+
+Your Hammerspoon config lives at `~/.hammerspoon/`:
 
 ```
 ~/.hammerspoon/
-├── init.lua              # Main config file (user-facing configuration)
-├── spoons/               # Feature modules
-│   ├── whisper.lua       # Speech-to-text transcription
-│   ├── lyrics.lua        # Spotify lyrics overlay
-│   ├── gemini.lua        # Screenshot OCR
-│   └── trimmy.lua        # Multi-line command flattener
-└── lib/                  # Utility/infrastructure code
-    ├── env.lua           # Environment variable loader
-    └── menubar.lua       # Menubar display manager
+├── init.lua              # Auto-generated, loads enabled spoons
+├── modules_config.lua    # Your spoon selections (managed by hs-pm)
+├── .env                  # API keys (never committed)
+├── lib/                  # Core libraries (auto-updated)
+└── spoons/               # Spoon modules (auto-updated)
 ```
 
-## Menubar Management
+**API Keys**: Edit `~/.hammerspoon/.env`:
 
-Flexible menubar display system that lets you control how modules appear in your macOS menubar.
+```bash
+# Get from: https://console.groq.com/keys
+GROQ_API_KEY=your_groq_api_key_here
 
-**Display Modes:**
-- **Individual Icons**: Each module has its own menubar icon (default)
-- **Consolidated Menu**: All modules grouped under a single menubar icon
+# Get from: https://aistudio.google.com/app/apikey
+GEMINI_API_KEY=your_gemini_api_key_here
+```
 
-**Per-Module Control:**
-When in "Individual Icons" mode, you can choose to display specific modules either:
-- As individual menubar icons
-- Inside the consolidated menu
-
-**Configuration:**
-Edit the `MENUBAR_CONFIG` table in `init.lua` to customize:
-- Display mode (individual or consolidated)
-- Enable/disable modules
-- Per-module display preferences
-
-**Settings:**
-- Access menubar settings via the consolidated menu icon (when visible)
-- Display preferences are automatically saved and persist across Hammerspoon reloads
-- All configuration is managed in `init.lua` for easy access
+After any changes, reload Hammerspoon (Cmd+Ctrl+R).
 
 ---
 
-## Installation
+## 📦 Project Structure
 
-1. Install [Hammerspoon](https://www.hammerspoon.org/)
-2. Clone or download this repository to `~/.hammerspoon/`
-3. Set up API keys:
-   ```bash
-   # Copy the example .env file
-   cp .env.example .env
-   
-   # Edit .env and add your API keys
-   # GROQ_API_KEY=your-groq-api-key-here
-   # GEMINI_API_KEY=your-gemini-api-key-here
-   ```
-4. Install dependencies:
-   ```bash
-   # For Whisper Transcription
-   brew install sox
-   ```
-5. Configure modules in `init.lua`:
-   - Edit `MENUBAR_CONFIG` to enable/disable modules
-   - Choose display mode (individual or consolidated)
-   - All spoons are automatically loaded and initialized
-6. Reload Hammerspoon configuration
+```
+power-spoons/
+├── core/                 # Core runtime files
+│   ├── lib/             # Utility libraries
+│   │   ├── env.lua      # Environment variable loader
+│   │   └── menubar.lua  # Menubar manager
+│   └── spoons/          # Spoon modules
+│       ├── whisper.lua
+│       ├── gemini.lua
+│       ├── lyrics.lua
+│       └── trimmy.lua
+├── manifests/
+│   └── spoons.json      # Spoon metadata and dependencies
+├── templates/           # Installation templates
+│   ├── init.lua
+│   ├── modules_config.lua
+│   └── .env.example
+└── scripts/
+    ├── hs-pm            # Package manager CLI (Python)
+    └── install.sh       # One-liner installer
+```
 
-## License
+---
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 🎨 Menubar Management
 
-## Contributing
+All spoons integrate with a flexible menubar system:
 
-This is a collection of useful Hammerspoon scripts. Contributions are welcome!
+**Display Modes:**
+- **Individual Icons**: Each spoon has its own menubar icon (default)
+- **Consolidated Menu**: All spoons grouped under one icon
 
-**How to contribute:**
-- Add new Hammerspoon scripts that solve real productivity problems
-- Improve existing scripts with bug fixes or new features
-- Update documentation to make scripts easier to use
-- Share your own creative automation ideas
+**Per-Module Control:**
+- Choose individual or consolidated display per spoon
+- Settings persist across reloads
+- Managed via menubar or `modules_config.lua`
 
-**Guidelines:**
-- Each script should be self-contained in its own `.lua` file
-- Follow the existing code style (see `AGENTS.md` for details)
-- Include clear documentation in the README for your script
-- Add any required API keys to `.env.example` (never commit actual keys)
-- Test your script thoroughly before submitting a PR
-- Keep dependencies minimal and document them clearly
+---
 
-**To add a new spoon:**
-1. Create your spoon in the `spoons/` directory (e.g., `spoons/myscript.lua`)
-2. Implement the standard module interface: `init(menubar)`, `start()`, `stop()`
-3. Add it to `init.lua`:
-   - Add to `MENUBAR_CONFIG.modules`
-   - Require with `local myscript = require("spoons.myscript")`
-   - Initialize with `myscript.init(menubar)`
-4. Document it in this README with features, requirements, and usage
-5. Submit a pull request with a clear description
+## 🔑 API Keys
 
-Feel free to open issues for bugs, feature requests, or questions!
+### Groq API (for Whisper)
+1. Sign up at [console.groq.com](https://console.groq.com)
+2. Navigate to [API Keys](https://console.groq.com/keys)
+3. Create a new API key
+4. Add to `~/.hammerspoon/.env`: `GROQ_API_KEY=...`
+
+**Pricing**: Whisper Large v3 Turbo is $0.04/hour of audio
+
+### Gemini API (for OCR)
+1. Get a key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Add to `~/.hammerspoon/.env`: `GEMINI_API_KEY=...`
+
+**Pricing**: Gemini Flash Lite has a generous free tier
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+### Adding a New Spoon
+
+1. **Create the spoon** in `core/spoons/yourspoon.lua`:
+
+```lua
+local M = {}
+
+function M.init(menubar)
+    -- Initialize your spoon
+    menubar.registerModule("yourspoon", getMenuItems(), getIcon(), "Tooltip")
+end
+
+function M.start()
+    -- Optional: start timers, watchers, etc.
+end
+
+function M.stop()
+    -- Optional: cleanup
+end
+
+return M
+```
+
+2. **Add metadata** to `manifests/spoons.json`:
+
+```json
+{
+  "id": "yourspoon",
+  "name": "Your Spoon Name",
+  "description": "What it does",
+  "dependencies": {
+    "brew": ["package"],
+    "env": ["API_KEY"]
+  },
+  "defaultEnabled": true,
+  "category": "productivity",
+  "hotkey": "Cmd+Shift+X"
+}
+```
+
+3. **Update template** in `templates/modules_config.lua`:
+   - Add your spoon to the modules list
+
+4. **Test it**:
+```bash
+hs-pm add yourspoon
+```
+
+5. **Submit a PR** with:
+   - Your spoon code
+   - Updated manifest
+   - README documentation
+   - Example usage
+
+### Code Style
+
+See [AGENTS.md](AGENTS.md) for detailed coding guidelines:
+- `SCREAMING_SNAKE_CASE` for constants
+- `camelCase` for functions
+- `snake_case` for module state
+- Prefix settings with module name
+
+---
+
+## 📝 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Credits
+
+- **Trimmy** spoon inspired by [@steipete](https://github.com/steipete)'s [native Trimmy app](https://github.com/steipete/Trimmy)
+- **Hammerspoon** - [www.hammerspoon.org](https://www.hammerspoon.org/)
+- **Groq** - Lightning-fast Whisper API
+- **Google Gemini** - Powerful multimodal AI
+- **lrclib.net** - Free lyrics API
+
+---
+
+## 🐛 Issues & Support
+
+- 🐞 Found a bug? [Open an issue](https://github.com/m0hill/power-spoons/issues)
+- 💡 Feature request? [Start a discussion](https://github.com/m0hill/power-spoons/discussions)
+- 📖 Documentation unclear? PRs welcome!
+
+---
+
+**Made with ❤️ for the Hammerspoon community**

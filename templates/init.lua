@@ -3,6 +3,7 @@ local modulesConfig = require("modules_config")
 
 local MENUBAR_CONFIG = modulesConfig.MENUBAR_CONFIG
 menubar.init(MENUBAR_CONFIG)
+
 for name, cfg in pairs(MENUBAR_CONFIG.modules) do
 	if cfg.enabled then
 		local ok, mod = pcall(require, "spoons." .. name)
