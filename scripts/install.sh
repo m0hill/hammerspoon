@@ -29,10 +29,10 @@ fi
 
 echo -e "${GREEN}✓${NC} Running on macOS"
 
-# Check if Homebrew is installed
+# Check if Homebrew is installed (needed for some spoon dependencies like sox)
 if ! command -v brew &> /dev/null; then
     echo -e "${YELLOW}⚠${NC} Homebrew not found"
-    echo -e "${BLUE}ℹ${NC} Installing Homebrew..."
+    echo -e "${BLUE}ℹ${NC} Installing Homebrew (needed for some spoon dependencies)..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     
     # Add Homebrew to PATH for Apple Silicon Macs

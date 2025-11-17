@@ -54,25 +54,88 @@ class HammerspoonPackageManager:
     
     def check_hammerspoon_installed(self) -> bool:
         """Check if Hammerspoon is installed"""
-        return (Path("/Applications/Hammerspoon.app").exists() or 
-                subprocess.run(["brew", "list", "--cask", "hammerspoon"], 
-                             capture_output=True).returncode == 0)
+        return Path("/Applications/Hammerspoon.app").exists()
+    
+    def get_latest_hammerspoon_release(self) -> Optional[str]:
+        """Get the latest Hammerspoon release URL from GitHub"""
+        try:
+            # Use curl to get latest release info (avoids SSL certificate issues)
+            result = subprocess.run([
+                "curl", "-s", 
+                "https://api.github.com/repos/Hammerspoon/hammerspoon/releases/latest"
+            ], capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                print_error(f"Failed to fetch release info: {result.stderr}")
+                return None
+            
+            data = json.loads(result.stdout)
+            # Find the .zip asset
+            for asset in data.get('assets', []):
+                if asset['name'].endswith('.zip'):
+                    return asset['browser_download_url']
+            return None
+        except Exception as e:
+            print_error(f"Failed to fetch latest release info: {e}")
+            return None
     
     def install_hammerspoon(self):
-        """Install Hammerspoon via Homebrew"""
+        """Install Hammerspoon from GitHub releases"""
         print_header("Installing Hammerspoon...")
+        print_info("Note: Homebrew is only needed for some spoon dependencies (like sox)")
+        print_info("Hammerspoon itself is installed directly from GitHub releases")
         
-        # Check if Homebrew is installed
-        if subprocess.run(["which", "brew"], capture_output=True).returncode != 0:
-            print_error("Homebrew is not installed. Please install it from https://brew.sh")
+        # Get latest release URL
+        download_url = self.get_latest_hammerspoon_release()
+        if not download_url:
+            print_error("Could not find latest Hammerspoon release")
+            print_info("Please download manually from: https://github.com/Hammerspoon/hammerspoon/releases/latest")
             sys.exit(1)
         
-        result = subprocess.run(["brew", "install", "--cask", "hammerspoon"])
-        if result.returncode == 0:
-            print_success("Hammerspoon installed successfully")
-        else:
-            print_error("Failed to install Hammerspoon")
-            sys.exit(1)
+        print_info(f"Downloading from {download_url}")
+        
+        # Create temp directory
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            zip_path = Path(tmpdir) / "Hammerspoon.zip"
+            
+            # Download the zip file using curl
+            try:
+                print_info("Downloading Hammerspoon...")
+                result = subprocess.run([
+                    "curl", "-L", "-o", str(zip_path), download_url
+                ], capture_output=True, text=True)
+                if result.returncode != 0:
+                    print_error(f"Failed to download: {result.stderr}")
+                    sys.exit(1)
+                print_success("Download complete")
+            except Exception as e:
+                print_error(f"Failed to download: {e}")
+                sys.exit(1)
+            
+            # Unzip
+            print_info("Extracting...")
+            result = subprocess.run(["unzip", "-q", str(zip_path), "-d", tmpdir])
+            if result.returncode != 0:
+                print_error("Failed to extract archive")
+                sys.exit(1)
+            
+            # Find the .app bundle
+            app_path = Path(tmpdir) / "Hammerspoon.app"
+            if not app_path.exists():
+                print_error("Hammerspoon.app not found in archive")
+                sys.exit(1)
+            
+            # Move to /Applications
+            dest_path = Path("/Applications/Hammerspoon.app")
+            if dest_path.exists():
+                print_warning("Removing existing Hammerspoon.app")
+                shutil.rmtree(dest_path)
+            
+            print_info("Installing to /Applications...")
+            shutil.copytree(app_path, dest_path)
+            print_success("Hammerspoon installed successfully to /Applications/Hammerspoon.app")
+            print_info("You can launch Hammerspoon from your Applications folder")
     
     def check_dependency(self, dep_type: str, dep: str) -> bool:
         """Check if a dependency is installed"""
