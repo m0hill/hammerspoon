@@ -11,7 +11,7 @@ local lyricsState = nil
 local fetchToken = 0
 local dragContext = nil
 local dragEventTap = nil
-local menuBar = nil
+local menubarManager = nil
 
 local function formatTime(seconds)
 	if not seconds or seconds < 0 then
@@ -411,18 +411,15 @@ local function tick()
 	render(state)
 end
 
-local function updateMenuBar()
-	if not menuBar then
-		menuBar = hs.menubar.new()
-		menuBar:setIcon(hs.image.imageFromName("NSSlideshowTemplate"))
-	end
+local updateMenuBar
 
+local function getMenuItems()
 	local visible = hs.settings.get(OVERLAY_VISIBLE_KEY)
 	if visible == nil then
 		visible = true
 	end
 
-	menuBar:setMenu({
+	return {
 		{
 			title = visible and "Hide Lyrics" or "Show Lyrics",
 			fn = function()
@@ -445,10 +442,31 @@ local function updateMenuBar()
 				updateMenuBar()
 			end,
 		},
-	})
+	}
+end
+
+updateMenuBar = function()
+	if menubarManager then
+		menubarManager.updateModule(
+			"lyrics",
+			getMenuItems(),
+			hs.image.imageFromName("NSSlideshowTemplate"),
+			"Spotify Lyrics"
+		)
+	end
 end
 
 local M = {}
+
+function M.init(manager)
+	menubarManager = manager
+	menubarManager.registerModule(
+		"lyrics",
+		getMenuItems(),
+		hs.image.imageFromName("NSSlideshowTemplate"),
+		"Spotify Lyrics"
+	)
+end
 
 function M.start()
 	if not pollTimer then
@@ -467,9 +485,9 @@ function M.stop()
 		dragEventTap:stop()
 		dragEventTap = nil
 	end
-	if menuBar then
-		menuBar:delete()
-		menuBar = nil
+	if menubarManager then
+		menubarManager.unregisterModule("lyrics")
+		menubarManager = nil
 	end
 	if overlay then
 		overlay:delete()
@@ -479,7 +497,5 @@ function M.stop()
 	lyricsState = nil
 	dragContext = nil
 end
-
-M.start()
 
 return M

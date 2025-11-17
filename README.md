@@ -134,6 +134,31 @@ This is a Lua/Hammerspoon port of the native macOS [Trimmy app](https://github.c
 
 ---
 
+## Menubar Management
+
+Flexible menubar display system that lets you control how modules appear in your macOS menubar.
+
+**Display Modes:**
+- **Individual Icons**: Each module has its own menubar icon (default)
+- **Consolidated Menu**: All modules grouped under a single menubar icon
+
+**Per-Module Control:**
+When in "Individual Icons" mode, you can choose to display specific modules either:
+- As individual menubar icons
+- Inside the consolidated menu
+
+**Settings:**
+- Access menubar settings via the consolidated menu icon (when visible) or any module's menubar
+- Display preferences are automatically saved and persist across Hammerspoon reloads
+- Modules can be enabled/disabled individually
+
+**Implementation:**
+- `menubar_config.lua` manages persistent settings
+- `menubar_manager.lua` handles dynamic menubar creation and updates
+- All modules integrate with the manager for consistent behavior
+
+---
+
 ## Installation
 
 1. Install [Hammerspoon](https://www.hammerspoon.org/)
@@ -152,12 +177,21 @@ This is a Lua/Hammerspoon port of the native macOS [Trimmy app](https://github.c
    # For Whisper Transcription
    brew install sox
    ```
-5. Ensure `init.lua` loads the packages:
+5. Ensure `init.lua` loads the menubar manager and packages:
    ```lua
-   require("gemini")
-   require("whisper")
-   require("lyrics")
-   require("trimmy")
+   local menubarManager = require("menubar_manager")
+   
+   local whisper = require("whisper")
+   local lyrics = require("lyrics")
+   local gemini = require("gemini")
+   local trimmy = require("trimmy")
+   
+   whisper.init(menubarManager)
+   lyrics.init(menubarManager)
+   gemini.init(menubarManager)
+   trimmy.init(menubarManager)
+   
+   lyrics.start()
    ```
 6. Reload Hammerspoon configuration
 

@@ -10,7 +10,8 @@
 ### Language & Structure
 - Language: Lua 5.3+ (Hammerspoon's embedded runtime)
 - Each module is self-contained in its own `.lua` file
-- Modules return a table `M` with public functions when needed, or run `init()` directly
+- Modules return a table `M` with public functions (`init`, `start`, `stop`) and integrate with menubar manager
+- Module pattern: return module table without auto-initialization (see whisper.lua:702, gemini.lua:414, lyrics.lua:501, trimmy.lua:290)
 
 ### Variables & Naming
 - `SCREAMING_SNAKE_CASE` for constants and config tables (e.g., `CONFIG`, `MODELS`, `LANGUAGES`)
@@ -33,3 +34,14 @@
 - Store secrets in `.env` file (ignored by git per .gitignore:2)
 - Reference `.env.example` for required keys (GROQ_API_KEY, GEMINI_API_KEY)
 - Never hardcode API keys in source files
+
+### Menubar Integration
+- All modules integrate with the centralized `menubar_manager` (see menubar_manager.lua:1)
+- Modules receive manager instance via `init(manager)` function
+- Register menubars with: `manager.registerModule(name, menuItems, icon, tooltip)`
+- Update menubars with: `manager.updateModule(name, menuItems, icon, tooltip)`
+- Unregister on cleanup with: `manager.unregisterModule(name)`
+- Menu items are plain tables, not menubar instances (see whisper.lua:280, gemini.lua:194)
+- Keep `getMenuItems()`, `getIcon()`, and `getTooltip()` as separate functions for clarity
+- Store manager reference in module-level variable (e.g., `local menubarManager = nil`)
+- Configuration managed by `menubar_config.lua` with persistent settings (see menubar_config.lua:1)

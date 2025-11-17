@@ -34,8 +34,9 @@ local state = {
 	pulseTimer = nil,
 	pulseDirection = 1,
 	pulseAlpha = 0.3,
-	menubar = nil,
 }
+
+local menubarManager = nil
 
 local function playSound(type)
 	if not CONFIG.ENABLE_SOUND then
@@ -172,12 +173,9 @@ local function getModelDisplayName()
 	return CONFIG.MODEL
 end
 
-local function updateMenuBar()
-	if not state.menubar then
-		state.menubar = hs.menubar.new()
-		state.menubar:setIcon(hs.image.imageFromName("NSTouchBarTextListTemplate"))
-	end
+local updateMenuBar
 
+local function getMenuItems()
 	local statusTitle = state.busy and "Processing..." or "Ready"
 
 	local modelSubmenu = {}
@@ -193,7 +191,7 @@ local function updateMenuBar()
 		})
 	end
 
-	state.menubar:setMenu({
+	return {
 		{ title = "Gemini OCR - " .. statusTitle, disabled = true },
 		{ title = "-" },
 		{
@@ -230,11 +228,18 @@ local function updateMenuBar()
 			title = "Hotkey: " .. table.concat(CONFIG.HOTKEY_MODS, "+") .. "+" .. CONFIG.HOTKEY_KEY,
 			disabled = true,
 		},
-	})
+	}
+end
 
-	state.menubar:setTooltip(
-		"Gemini OCR\n" .. table.concat(CONFIG.HOTKEY_MODS, "+") .. "+" .. CONFIG.HOTKEY_KEY .. " to capture"
-	)
+updateMenuBar = function()
+	if menubarManager then
+		menubarManager.updateModule(
+			"gemini",
+			getMenuItems(),
+			hs.image.imageFromName("NSTouchBarTextListTemplate"),
+			"Gemini OCR\n" .. table.concat(CONFIG.HOTKEY_MODS, "+") .. "+" .. CONFIG.HOTKEY_KEY .. " to capture"
+		)
+	end
 end
 
 local function extractTextFromResponse(body)
@@ -406,5 +411,25 @@ local function startCapture()
 	end
 end
 
-updateMenuBar()
-hs.hotkey.bind(CONFIG.HOTKEY_MODS, CONFIG.HOTKEY_KEY, startCapture)
+local M = {}
+
+function M.init(manager)
+	menubarManager = manager
+	menubarManager.registerModule(
+		"gemini",
+		getMenuItems(),
+		hs.image.imageFromName("NSTouchBarTextListTemplate"),
+		"Gemini OCR\n" .. table.concat(CONFIG.HOTKEY_MODS, "+") .. "+" .. CONFIG.HOTKEY_KEY .. " to capture"
+	)
+
+	hs.hotkey.bind(CONFIG.HOTKEY_MODS, CONFIG.HOTKEY_KEY, startCapture)
+end
+
+function M.stop()
+	if menubarManager then
+		menubarManager.unregisterModule("gemini")
+		menubarManager = nil
+	end
+end
+
+return M

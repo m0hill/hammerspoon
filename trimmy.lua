@@ -10,7 +10,7 @@ local settings = {
 local lastChangeCount = hs.pasteboard.changeCount()
 local lastSummary = "No trims yet"
 local clipboardWatcher = nil
-local menubar = nil
+local menubarManager = nil
 
 local function saveSetting(key, value)
 	hs.settings.set(SETTINGS_PREFIX .. key, value)
@@ -180,12 +180,10 @@ local function clipboardChanged()
 	end
 end
 
-local function updateMenu()
-	if not menubar then
-		return
-	end
+local updateMenu
 
-	menubar:setMenu({
+local function getMenuItems()
+	return {
 		{
 			title = "Auto-Trim: " .. (settings.autoTrimEnabled and "✓ On" or "✗ Off"),
 			fn = function()
@@ -243,14 +241,30 @@ local function updateMenu()
 				updateMenu()
 			end,
 		},
-	})
+	}
 end
 
-local function init()
-	menubar = hs.menubar.new()
-	menubar:setIcon(hs.image.imageFromName("NSActionTemplate"))
-	menubar:setTooltip("Trimmy - Clipboard command flattener")
-	updateMenu()
+updateMenu = function()
+	if menubarManager then
+		menubarManager.updateModule(
+			"trimmy",
+			getMenuItems(),
+			hs.image.imageFromName("NSRefreshTemplate"),
+			"Trimmy - Clipboard command flattener"
+		)
+	end
+end
+
+local M = {}
+
+function M.init(manager)
+	menubarManager = manager
+	menubarManager.registerModule(
+		"trimmy",
+		getMenuItems(),
+		hs.image.imageFromName("NSRefreshTemplate"),
+		"Trimmy - Clipboard command flattener"
+	)
 
 	if clipboardWatcher then
 		clipboardWatcher:stop()
@@ -263,4 +277,15 @@ local function init()
 	print("Trimmy started - watching clipboard")
 end
 
-init()
+function M.stop()
+	if clipboardWatcher then
+		clipboardWatcher:stop()
+		clipboardWatcher = nil
+	end
+	if menubarManager then
+		menubarManager.unregisterModule("trimmy")
+		menubarManager = nil
+	end
+end
+
+return M

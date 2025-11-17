@@ -34,7 +34,7 @@ local LANGUAGES = {
 
 local GROQ_API_KEY = env.get("GROQ_API_KEY")
 local REC = nil
-local menubar = nil
+local menubarManager = nil
 local isRecording = false
 local isBusy = false
 local recTask = nil
@@ -48,7 +48,6 @@ local pulseDirection = 1
 local pulseAlpha = 0.3
 local telemetry = nil
 
--- Forward declarations
 local updateUI
 local stopRecordingAndTranscribe
 
@@ -253,49 +252,18 @@ Hold the hotkey to record speech, release to transcribe and paste.]],
 	hs.dialog.blockAlert("About Whisper Transcription", aboutText, "OK")
 end
 
-updateUI = function()
-	if not menubar then
-		return
-	end
-
+local function getMenuItems()
 	if isRecording then
-		menubar:setIcon(hs.image.imageFromName("NSStatusAvailable"))
-		menubar:setTooltip("Recording audio... (Hold to continue)")
-		menubar:setMenu({
+		return {
 			{ title = "Recording...", disabled = true },
 			{ title = "-" },
 			{ title = "Stop Recording", fn = stopRecordingAndTranscribe },
-			{ title = "-" },
-			{
-				title = "Quit",
-				fn = function()
-					os.exit()
-				end,
-			},
-		})
+		}
 	elseif isBusy then
-		menubar:setIcon(hs.image.imageFromName("NSStatusPartiallyAvailable"))
-		menubar:setTooltip("Transcribing audio...")
-		menubar:setMenu({
+		return {
 			{ title = "Transcribing...", disabled = true },
-			{ title = "-" },
-			{
-				title = "Quit",
-				fn = function()
-					os.exit()
-				end,
-			},
-		})
+		}
 	else
-		menubar:setIcon(hs.image.imageFromName("NSTouchBarRecordStartTemplate"))
-		menubar:setTooltip(
-			"Whisper Transcription Ready\nHold "
-				.. table.concat(CONFIG.HOTKEY_MODS, "+")
-				.. "+"
-				.. CONFIG.HOTKEY_KEY
-				.. " to record"
-		)
-
 		local languageSubmenu = {}
 		for _, lang in ipairs(LANGUAGES) do
 			table.insert(languageSubmenu, {
@@ -309,7 +277,7 @@ updateUI = function()
 			})
 		end
 
-		menubar:setMenu({
+		return {
 			{ title = "Ready to Record", disabled = true },
 			{ title = "-" },
 			{
@@ -355,14 +323,37 @@ updateUI = function()
 				title = "About",
 				fn = showAbout,
 			},
-			{ title = "-" },
-			{
-				title = "Quit",
-				fn = function()
-					os.exit()
-				end,
-			},
-		})
+		}
+	end
+end
+
+local function getIcon()
+	if isRecording then
+		return hs.image.imageFromName("NSStatusAvailable")
+	elseif isBusy then
+		return hs.image.imageFromName("NSStatusPartiallyAvailable")
+	else
+		return hs.image.imageFromName("NSTouchBarRecordStartTemplate")
+	end
+end
+
+local function getTooltip()
+	if isRecording then
+		return "Recording audio... (Hold to continue)"
+	elseif isBusy then
+		return "Transcribing audio..."
+	else
+		return "Whisper Transcription Ready\nHold "
+			.. table.concat(CONFIG.HOTKEY_MODS, "+")
+			.. "+"
+			.. CONFIG.HOTKEY_KEY
+			.. " to record"
+	end
+end
+
+updateUI = function()
+	if menubarManager then
+		menubarManager.updateModule("whisper", getMenuItems(), getIcon(), getTooltip())
 	end
 end
 
@@ -688,14 +679,17 @@ local function startRecording()
 	stopTimer = hs.timer.doAfter(CONFIG.MAX_HOLD_SECONDS, stopRecordingAndTranscribe)
 end
 
-local function init()
+local M = {}
+
+function M.init(manager)
 	if not checkDependencies() then
 		return
 	end
 
-	menubar = hs.menubar.new()
+	menubarManager = manager
+	menubarManager.registerModule("whisper", getMenuItems(), getIcon(), getTooltip())
+
 	hs.hotkey.bind(CONFIG.HOTKEY_MODS, CONFIG.HOTKEY_KEY, startRecording, stopRecordingAndTranscribe)
-	updateUI()
 	notify(
 		"Whisper Ready",
 		"Hold " .. table.concat(CONFIG.HOTKEY_MODS, "+") .. "+" .. CONFIG.HOTKEY_KEY .. " to start recording",
@@ -703,4 +697,4 @@ local function init()
 	)
 end
 
-init()
+return M
