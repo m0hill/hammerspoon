@@ -1,4 +1,4 @@
-# 🚀 Quick Start Guide
+# Quick Start Guide
 
 Get up and running with Power Spoons in 5 minutes!
 
@@ -32,11 +32,11 @@ hs-pm init
 ```
 
 This interactive installer will:
-1. ✅ Check/install Hammerspoon
-2. ✅ Let you choose which spoons to enable
-3. ✅ Install dependencies (sox, etc.)
-4. ✅ Prompt for API keys
-5. ✅ Set up your configuration
+1. Check/install Hammerspoon
+2. Let you choose which spoons to enable
+3. Install dependencies (sox, etc.)
+4. Prompt for API keys
+5. Set up your configuration
 
 ### Step 4: Reload Hammerspoon
 

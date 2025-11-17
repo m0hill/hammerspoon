@@ -1,4 +1,4 @@
-# 🚀 Power Spoons
+# Power Spoons
 
 > A curated collection of powerful Hammerspoon productivity tools with a built-in package manager
 
@@ -6,19 +6,19 @@ Replace bloated Electron apps with lightweight, native macOS automation using Lu
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## ✨ Features
+## Features
 
-- **📦 Package Manager**: Simple CLI tool (`hs-pm`) to install and manage spoons
-- **🎯 Zero Config**: One-liner installation with interactive setup
-- **🔧 Modular**: Enable only the spoons you need
-- **💾 Lightweight**: Native macOS integration, no Electron bloat
-- **🔐 Secure**: API keys stored locally in `.env` file
+- **Package Manager**: Simple CLI tool (`hs-pm`) to install and manage spoons
+- **Zero Config**: One-liner installation with interactive setup
+- **Modular**: Enable only the spoons you need
+- **Lightweight**: Native macOS integration, no Electron bloat
+- **Secure**: API keys stored locally in `.env` file
 
 ---
 
-## 🎁 Available Spoons
+## Available Spoons
 
-### 🎙️ Whisper Transcription
+### Whisper Transcription
 Real-time speech-to-text using OpenAI's Whisper via Groq API.
 
 - **Hotkey**: `Option+/` - Hold to record, release to transcribe
@@ -29,7 +29,7 @@ Real-time speech-to-text using OpenAI's Whisper via Groq API.
 
 ---
 
-### 📸 Gemini OCR
+### Gemini OCR
 Screenshot-based text extraction with Google's Gemini AI.
 
 - **Hotkey**: `Cmd+Shift+S` - Screenshot area with text
@@ -40,7 +40,7 @@ Screenshot-based text extraction with Google's Gemini AI.
 
 ---
 
-### 🎵 Spotify Lyrics
+### Spotify Lyrics
 Floating synchronized lyrics overlay for Spotify.
 
 - **Auto-sync**: Real-time lyrics synchronized with playback
@@ -51,7 +51,7 @@ Floating synchronized lyrics overlay for Spotify.
 
 ---
 
-### ✂️ Trimmy
+### Trimmy
 Automatically flatten multi-line shell commands in clipboard.
 
 - **Auto-detect**: Recognizes shell commands automatically
@@ -62,7 +62,7 @@ Automatically flatten multi-line shell commands in clipboard.
 
 ---
 
-## 📥 Installation
+## Installation
 
 ### New Users (Recommended)
 
@@ -79,11 +79,11 @@ hs-pm init
 ```
 
 This will:
-1. ✅ Install Hammerspoon (if needed)
-2. ✅ Install sox and other dependencies (if needed)
-3. ✅ Let you choose which spoons to enable
-4. ✅ Prompt for API keys
-5. ✅ Set up your `~/.hammerspoon` configuration
+1. Install Hammerspoon (if needed)
+2. Install sox and other dependencies (if needed)
+3. Let you choose which spoons to enable
+4. Prompt for API keys
+5. Set up your `~/.hammerspoon` configuration
 
 ### Existing Hammerspoon Users
 
@@ -121,7 +121,7 @@ whisper.init(menubar)
 
 ---
 
-## 🎮 Usage
+## Usage
 
 ### Managing Spoons
 
@@ -169,7 +169,7 @@ After any changes, reload Hammerspoon (Cmd+Ctrl+R).
 
 ---
 
-## 📦 Project Structure
+## Project Structure
 
 ```
 power-spoons/
@@ -195,7 +195,7 @@ power-spoons/
 
 ---
 
-## 🎨 Menubar Management
+## Menubar Management
 
 All spoons integrate with a flexible menubar system:
 
@@ -210,7 +210,7 @@ All spoons integrate with a flexible menubar system:
 
 ---
 
-## 🔑 API Keys
+## API Keys
 
 ### Groq API (for Whisper)
 1. Sign up at [console.groq.com](https://console.groq.com)
@@ -228,7 +228,7 @@ All spoons integrate with a flexible menubar system:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Here's how you can help:
 
@@ -296,13 +296,13 @@ See [AGENTS.md](AGENTS.md) for detailed coding guidelines:
 
 ---
 
-## 📝 License
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Credits
+## Credits
 
 - **Trimmy** spoon inspired by [@steipete](https://github.com/steipete)'s [native Trimmy app](https://github.com/steipete/Trimmy)
 - **Hammerspoon** - [www.hammerspoon.org](https://www.hammerspoon.org/)
@@ -312,11 +312,11 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🐛 Issues & Support
+## Issues & Support
 
-- 🐞 Found a bug? [Open an issue](https://github.com/m0hill/power-spoons/issues)
-- 💡 Feature request? [Start a discussion](https://github.com/m0hill/power-spoons/discussions)
-- 📖 Documentation unclear? PRs welcome!
+- Found a bug? [Open an issue](https://github.com/m0hill/power-spoons/issues)
+- Feature request? [Start a discussion](https://github.com/m0hill/power-spoons/discussions)
+- Documentation unclear? PRs welcome!
 
 ---
 
