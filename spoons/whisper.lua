@@ -1,4 +1,4 @@
-local env = require("env")
+local env = require("lib.env")
 
 local CONFIG = {
 	MODEL = "whisper-large-v3-turbo",

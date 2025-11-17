@@ -3,6 +3,8 @@
   "diagnostics.disable": ["undefined-field"],
   "runtime.version": "Lua 5.4",
   "workspace.library": [
-    "/Applications/Hammerspoon.app/Contents/Resources/extensions/hs"
+    "/Applications/Hammerspoon.app/Contents/Resources/extensions/hs",
+    "${workspaceFolder}/lib",
+    "${workspaceFolder}/spoons"
   ]
 }

@@ -1,4 +1,4 @@
-local env = require("env")
+local env = require("lib.env")
 
 local CONFIG = {
 	HOTKEY_MODS = { "cmd", "shift" },

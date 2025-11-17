@@ -134,6 +134,21 @@ This is a Lua/Hammerspoon port of the native macOS [Trimmy app](https://github.c
 
 ---
 
+## Project Structure
+
+```
+~/.hammerspoon/
+├── init.lua              # Main config file (user-facing configuration)
+├── spoons/               # Feature modules
+│   ├── whisper.lua       # Speech-to-text transcription
+│   ├── lyrics.lua        # Spotify lyrics overlay
+│   ├── gemini.lua        # Screenshot OCR
+│   └── trimmy.lua        # Multi-line command flattener
+└── lib/                  # Utility/infrastructure code
+    ├── env.lua           # Environment variable loader
+    └── menubar.lua       # Menubar display manager
+```
+
 ## Menubar Management
 
 Flexible menubar display system that lets you control how modules appear in your macOS menubar.
@@ -147,15 +162,16 @@ When in "Individual Icons" mode, you can choose to display specific modules eith
 - As individual menubar icons
 - Inside the consolidated menu
 
-**Settings:**
-- Access menubar settings via the consolidated menu icon (when visible) or any module's menubar
-- Display preferences are automatically saved and persist across Hammerspoon reloads
-- Modules can be enabled/disabled individually
+**Configuration:**
+Edit the `MENUBAR_CONFIG` table in `init.lua` to customize:
+- Display mode (individual or consolidated)
+- Enable/disable modules
+- Per-module display preferences
 
-**Implementation:**
-- `menubar_config.lua` manages persistent settings
-- `menubar_manager.lua` handles dynamic menubar creation and updates
-- All modules integrate with the manager for consistent behavior
+**Settings:**
+- Access menubar settings via the consolidated menu icon (when visible)
+- Display preferences are automatically saved and persist across Hammerspoon reloads
+- All configuration is managed in `init.lua` for easy access
 
 ---
 
@@ -177,22 +193,10 @@ When in "Individual Icons" mode, you can choose to display specific modules eith
    # For Whisper Transcription
    brew install sox
    ```
-5. Ensure `init.lua` loads the menubar manager and packages:
-   ```lua
-   local menubarManager = require("menubar_manager")
-   
-   local whisper = require("whisper")
-   local lyrics = require("lyrics")
-   local gemini = require("gemini")
-   local trimmy = require("trimmy")
-   
-   whisper.init(menubarManager)
-   lyrics.init(menubarManager)
-   gemini.init(menubarManager)
-   trimmy.init(menubarManager)
-   
-   lyrics.start()
-   ```
+5. Configure modules in `init.lua`:
+   - Edit `MENUBAR_CONFIG` to enable/disable modules
+   - Choose display mode (individual or consolidated)
+   - All spoons are automatically loaded and initialized
 6. Reload Hammerspoon configuration
 
 ## License
@@ -217,10 +221,14 @@ This is a collection of useful Hammerspoon scripts. Contributions are welcome!
 - Test your script thoroughly before submitting a PR
 - Keep dependencies minimal and document them clearly
 
-**To add a new script:**
-1. Create your script as a new `.lua` file (e.g., `myscript.lua`)
-2. Add `require("myscript")` to `init.lua`
-3. Document it in this README with features, requirements, and usage
-4. Submit a pull request with a clear description
+**To add a new spoon:**
+1. Create your spoon in the `spoons/` directory (e.g., `spoons/myscript.lua`)
+2. Implement the standard module interface: `init(menubar)`, `start()`, `stop()`
+3. Add it to `init.lua`:
+   - Add to `MENUBAR_CONFIG.modules`
+   - Require with `local myscript = require("spoons.myscript")`
+   - Initialize with `myscript.init(menubar)`
+4. Document it in this README with features, requirements, and usage
+5. Submit a pull request with a clear description
 
 Feel free to open issues for bugs, feature requests, or questions!

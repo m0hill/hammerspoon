@@ -1,6 +1,7 @@
-local menubarConfig = require("menubar_config")
-
 local M = {}
+
+local SETTINGS_KEY = "menubar.config"
+local DEFAULT_CONFIG = nil
 
 local consolidatedMenubar = nil
 local moduleMenubars = {}
@@ -10,8 +11,49 @@ local moduleTooltips = {}
 
 local updateConsolidatedMenu
 
+function M.init(config)
+	DEFAULT_CONFIG = config
+end
+
+local function getConfig()
+	local saved = hs.settings.get(SETTINGS_KEY)
+	if saved then
+		local config = hs.fnutils.copy(DEFAULT_CONFIG)
+		if saved.mode then
+			config.mode = saved.mode
+		end
+		if saved.modules then
+			for module, settings in pairs(saved.modules) do
+				if config.modules[module] then
+					config.modules[module] = hs.fnutils.copy(settings)
+				end
+			end
+		end
+		return config
+	end
+	return hs.fnutils.copy(DEFAULT_CONFIG)
+end
+
+local function saveConfig(config)
+	hs.settings.set(SETTINGS_KEY, config)
+end
+
+local function setMode(mode)
+	local config = getConfig()
+	config.mode = mode
+	saveConfig(config)
+end
+
+local function setModuleDisplay(moduleName, display)
+	local config = getConfig()
+	if config.modules[moduleName] then
+		config.modules[moduleName].display = display
+	end
+	saveConfig(config)
+end
+
 local function getDisplayMode(moduleName)
-	local config = menubarConfig.get()
+	local config = getConfig()
 	local moduleConfig = config.modules[moduleName]
 
 	if not moduleConfig or not moduleConfig.enabled then
@@ -56,7 +98,7 @@ local function destroyConsolidatedMenubar()
 end
 
 local function needsConsolidatedMenubar()
-	local config = menubarConfig.get()
+	local config = getConfig()
 	if config.mode == "consolidated" then
 		return true
 	end
@@ -76,7 +118,7 @@ updateConsolidatedMenu = function()
 	end
 
 	local menu = {}
-	local config = menubarConfig.get()
+	local config = getConfig()
 
 	for moduleName, items in pairs(moduleMenuItems) do
 		if getDisplayMode(moduleName) == "consolidated" then
@@ -97,7 +139,7 @@ updateConsolidatedMenu = function()
 			{
 				title = "Individual Icons",
 				fn = function()
-					menubarConfig.setMode("individual")
+					setMode("individual")
 					M.refresh()
 				end,
 				checked = config.mode == "individual",
@@ -105,7 +147,7 @@ updateConsolidatedMenu = function()
 			{
 				title = "Consolidated Menu",
 				fn = function()
-					menubarConfig.setMode("consolidated")
+					setMode("consolidated")
 					M.refresh()
 				end,
 				checked = config.mode == "consolidated",
@@ -126,7 +168,7 @@ updateConsolidatedMenu = function()
 						{
 							title = "Individual Icon",
 							fn = function()
-								menubarConfig.setModuleDisplay(moduleName, "individual")
+								setModuleDisplay(moduleName, "individual")
 								M.refresh()
 							end,
 							checked = moduleConfig.display == "individual",
@@ -134,7 +176,7 @@ updateConsolidatedMenu = function()
 						{
 							title = "In Consolidated Menu",
 							fn = function()
-								menubarConfig.setModuleDisplay(moduleName, "consolidated")
+								setModuleDisplay(moduleName, "consolidated")
 								M.refresh()
 							end,
 							checked = moduleConfig.display == "consolidated",
@@ -228,7 +270,7 @@ function M.refresh()
 end
 
 function M.getConfig()
-	return menubarConfig.get()
+	return getConfig()
 end
 
 return M
