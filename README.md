@@ -128,7 +128,9 @@ Automatically flattens multi-line shell commands copied to the clipboard, making
 - Scores text based on command-like patterns (pipes, flags, backslashes, sudo, etc.)
 - Flattens qualifying text by removing line breaks and handling continuations
 - Skips auto-processing for 10+ line copies (safety valve)
-- Port of the native macOS [Trimmy app](https://github.com/steipete/Trimmy)
+
+**Inspired by:**
+This is a Lua/Hammerspoon port of the native macOS [Trimmy app](https://github.com/steipete/Trimmy) by [@steipete](https://github.com/steipete).
 
 ---
 
@@ -158,6 +160,10 @@ Automatically flattens multi-line shell commands copied to the clipboard, making
    require("trimmy")
    ```
 6. Reload Hammerspoon configuration
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
