@@ -17,7 +17,7 @@ Real-time speech-to-text transcription using OpenAI's Whisper model via Groq API
 
 **Requirements:**
 - [sox](https://sox.sourceforge.net/) (install with `brew install sox`)
-- Groq API key (set as environment variable `GROQ_API_KEY`)
+- Groq API key (add to `.env` file)
 
 **Usage:**
 - **Record**: Hold Option+/ to start recording
@@ -48,7 +48,7 @@ Screenshot-based text extraction using Google's Gemini API with automatic transl
 - **Auto-Copy**: Extracted text automatically copied to clipboard
 
 **Requirements:**
-- Google Gemini API key (set as environment variable `GEMINI_API_KEY`)
+- Google Gemini API key (add to `.env` file)
 - Active internet connection
 
 **Usage:**
@@ -94,17 +94,56 @@ Real-time synchronized lyrics display for Spotify with a draggable overlay.
 
 ---
 
+### Trimmy
+
+Automatically flattens multi-line shell commands copied to the clipboard, making them pasteable in one go.
+
+**Features:**
+- **Auto-Detection**: Automatically detects and flattens shell commands in clipboard
+- **Aggressiveness Levels**: Low/Normal/High detection sensitivity
+- **Backslash Handling**: Properly handles line continuations with `\`
+- **Blank Line Preservation**: Optional preservation of intentional blank lines
+- **Visual Feedback**: Menubar icon with last trimmed command preview
+- **Manual Override**: Force-trim clipboard on demand
+- **Persistent Settings**: All preferences saved automatically
+
+**Requirements:**
+- None - uses built-in Hammerspoon APIs
+
+**Usage:**
+- Copy multi-line shell commands - they're automatically flattened
+- Use menubar to toggle auto-trim, set aggressiveness, or manually trim
+- "Trim Clipboard Now" forces trimming regardless of auto-detection
+
+**Configuration:**
+- **Auto-Trim**: Enable/disable automatic clipboard processing
+- **Aggressiveness**: 
+  - Low (safer): Requires strong command indicators (≥3 signals)
+  - Normal (default): Balanced detection (≥2 signals)
+  - High (eager): Flattens most multi-line text (≥1 signal)
+- **Keep blank lines**: Preserves intentional blank lines during flattening
+
+**How it works:**
+- Polls clipboard every 150ms for changes
+- Scores text based on command-like patterns (pipes, flags, backslashes, sudo, etc.)
+- Flattens qualifying text by removing line breaks and handling continuations
+- Skips auto-processing for 10+ line copies (safety valve)
+- Port of the native macOS [Trimmy app](https://github.com/steipete/Trimmy)
+
+---
+
 ## Installation
 
 1. Install [Hammerspoon](https://www.hammerspoon.org/)
 2. Clone or download this repository to `~/.hammerspoon/`
-3. Set up environment variables:
+3. Set up API keys:
    ```bash
-   # For Gemini OCR
-   export GEMINI_API_KEY="your-gemini-api-key"
+   # Copy the example .env file
+   cp .env.example .env
    
-   # For Whisper Transcription
-   export GROQ_API_KEY="your-groq-api-key"
+   # Edit .env and add your API keys
+   # GROQ_API_KEY=your-groq-api-key-here
+   # GEMINI_API_KEY=your-gemini-api-key-here
    ```
 4. Install dependencies:
    ```bash
@@ -116,5 +155,32 @@ Real-time synchronized lyrics display for Spotify with a draggable overlay.
    require("gemini")
    require("whisper")
    require("lyrics")
+   require("trimmy")
    ```
 6. Reload Hammerspoon configuration
+
+## Contributing
+
+This is a collection of useful Hammerspoon scripts. Contributions are welcome!
+
+**How to contribute:**
+- Add new Hammerspoon scripts that solve real productivity problems
+- Improve existing scripts with bug fixes or new features
+- Update documentation to make scripts easier to use
+- Share your own creative automation ideas
+
+**Guidelines:**
+- Each script should be self-contained in its own `.lua` file
+- Follow the existing code style (see `AGENTS.md` for details)
+- Include clear documentation in the README for your script
+- Add any required API keys to `.env.example` (never commit actual keys)
+- Test your script thoroughly before submitting a PR
+- Keep dependencies minimal and document them clearly
+
+**To add a new script:**
+1. Create your script as a new `.lua` file (e.g., `myscript.lua`)
+2. Add `require("myscript")` to `init.lua`
+3. Document it in this README with features, requirements, and usage
+4. Submit a pull request with a clear description
+
+Feel free to open issues for bugs, feature requests, or questions!
