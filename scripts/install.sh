@@ -1,10 +1,10 @@
 #!/bin/bash
 # Power Spoons One-liner Installer
-# Usage: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/<user>/power-spoons/main/scripts/install.sh)"
+# Usage: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/m0hill/power-spoons/main/scripts/install.sh)"
 
 set -e
 
-REPO_URL="https://github.com/<user>/power-spoons.git"
+REPO_URL="https://github.com/m0hill/power-spoons.git"
 INSTALL_DIR="$HOME/.power-spoons"
 BLUE='\033[0;34m'
 GREEN='\033[0;32m'
@@ -34,7 +34,7 @@ if ! command -v brew &> /dev/null; then
     echo -e "${YELLOW}⚠${NC} Homebrew not found"
     echo -e "${BLUE}ℹ${NC} Installing Homebrew (needed for some spoon dependencies)..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    
+
     # Add Homebrew to PATH for Apple Silicon Macs
     if [[ $(uname -m) == "arm64" ]]; then
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
