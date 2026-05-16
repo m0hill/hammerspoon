@@ -116,6 +116,7 @@ typedef int (^PushArgsBlock)(LuaSkin *skin, lua_State *L);
 - (BOOL)fireCallback:(NSString *)event errorName:(NSString *)errorName resultBool:(BOOL *)resultBool pushArgs:(PushArgsBlock)pushArgs;
 - (BOOL)handleKeyDown:(NSEvent *)event;
 - (BOOL)routeDefaultKeyDown:(NSEvent *)event;
+- (BOOL)routeDefaultCommandSelector:(SEL)commandSelector;
 - (void)hidePanel;
 - (void)cleanup;
 @end
@@ -382,6 +383,15 @@ typedef int (^PushArgsBlock)(LuaSkin *skin, lua_State *L);
     return NO;
 }
 
+- (BOOL)routeDefaultCommandSelector:(SEL)commandSelector {
+    HSUIList *list = [self.content firstList];
+    if (commandSelector == @selector(moveUp:) && list) { [list selectPrevious]; return YES; }
+    if (commandSelector == @selector(moveDown:) && list) { [list selectNext]; return YES; }
+    if ((commandSelector == @selector(insertNewline:) || commandSelector == @selector(insertNewlineIgnoringFieldEditor:)) && list) { [list confirmSelection]; return YES; }
+    if (commandSelector == @selector(cancelOperation:) && self.escapeCloses) { [self hidePanel]; return YES; }
+    return NO;
+}
+
 - (void)hidePanel { if (!self.deleted) runOnMainSync(^{ [self.window orderOut:nil]; }); }
 
 - (BOOL)windowShouldClose:(id)sender {
@@ -436,6 +446,10 @@ typedef int (^PushArgsBlock)(LuaSkin *skin, lua_State *L);
     BOOL search = boolField(L, idx, "search", NO);
     NSString *placeholder = stringField(L, idx, "placeholder", @"");
     CGFloat fontSize = numberField(L, idx, "fontSize", 13);
+    BOOL bordered = boolField(L, idx, "bordered", YES);
+    BOOL bezeled = boolField(L, idx, "bezeled", bordered);
+    BOOL drawsBackground = boolField(L, idx, "drawsBackground", YES);
+    BOOL focusRing = boolField(L, idx, "focusRing", YES);
     [self readLayoutFromLua:L index:idx defaultGrow:NO];
     runOnMainSync(^{
         NSTextField *field;
@@ -451,6 +465,11 @@ typedef int (^PushArgsBlock)(LuaSkin *skin, lua_State *L);
         field.delegate = self;
         field.placeholderString = placeholder;
         field.font = [NSFont systemFontOfSize:fontSize];
+        field.bordered = bordered;
+        field.bezeled = bezeled;
+        field.drawsBackground = drawsBackground;
+        field.focusRingType = focusRing ? NSFocusRingTypeDefault : NSFocusRingTypeNone;
+        if (!drawsBackground) field.backgroundColor = NSColor.clearColor;
         field.translatesAutoresizingMaskIntoConstraints = NO;
         self.textField = field;
         self.view = field;
@@ -478,6 +497,27 @@ typedef int (^PushArgsBlock)(LuaSkin *skin, lua_State *L);
     }
 
     if (self.panel && [self.panel handleKeyDown:event]) return YES;
+    return NO;
+}
+
+- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView doCommandBySelector:(SEL)commandSelector {
+    (void)control;
+    (void)textView;
+
+    if (commandSelector == @selector(insertNewline:) || commandSelector == @selector(insertNewlineIgnoringFieldEditor:)) {
+        __block BOOL submitConsumed = NO;
+        [self fireCallback:@"submit" errorName:@"hs.ui.textField submit" resultBool:&submitConsumed pushArgs:^int(LuaSkin *skin, lua_State *L) {
+            [skin pushNSObject:self.textField.stringValue ?: @""];
+            return 1;
+        }];
+        if (submitConsumed) return YES;
+    } else if (commandSelector == @selector(cancelOperation:)) {
+        __block BOOL escapeConsumed = NO;
+        [self fireCallback:@"escape" errorName:@"hs.ui.textField escape" resultBool:&escapeConsumed pushArgs:nil];
+        if (escapeConsumed) return YES;
+    }
+
+    if (self.panel && [self.panel routeDefaultCommandSelector:commandSelector]) return YES;
     return NO;
 }
 
@@ -650,7 +690,7 @@ typedef int (^PushArgsBlock)(LuaSkin *skin, lua_State *L);
         self.stackView.spacing = spacing;
         self.stackView.edgeInsets = NSEdgeInsetsMake(top, left, bottom, right);
         self.stackView.distribution = NSStackViewDistributionFill;
-        self.stackView.alignment = NSLayoutAttributeLeading;
+        self.stackView.alignment = [orientation isEqualToString:@"horizontal"] ? NSLayoutAttributeCenterY : NSLayoutAttributeLeading;
         self.stackView.translatesAutoresizingMaskIntoConstraints = NO;
         self.view = self.stackView;
         [self applyLayout];
