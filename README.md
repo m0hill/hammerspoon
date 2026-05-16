@@ -8,6 +8,10 @@
 
 Discord: [Click to join](https://discord.gg/vxchqkRbkR)
 
+## Private fork notes
+
+This checkout is used locally as a private fork with an experimental native AppKit `hs.ui` module. See [PRIVATE_FORK.md](PRIVATE_FORK.md) for local build, install, signing, Accessibility/TCC, IPC, and memory-check notes.
+
 ## What is Hammerspoon?
 
 This is a tool for powerful automation of OS X. At its core, Hammerspoon is just a bridge between the operating system and a Lua scripting engine.
